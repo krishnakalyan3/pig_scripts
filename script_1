@@ -1,0 +1,11 @@
+REGISTER '/home/cloudera/Desktop/PigUDF.jar';
+A = load 'input_1' as m:map[chararray];
+B= FOREACH A GENERATE m#'message' AS message,m#'date' AS date;
+C= FOREACH B GENERATE date as date,UDF.Clean(message) as message;
+D= FILTER C BY date is not null; 
+E= FOREACH D GENERATE UDF.Time(date) as date,message;
+F = FOREACH E GENERATE UDF.Regex(message) as message,date; 
+G = FILTER F by message is not null;   
+H = Group G by (message,date);
+I = FOREACH H generate FLATTEN(group),COUNT($1);     
+dump I; 
